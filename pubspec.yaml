@@ -38,6 +38,15 @@ dependencies:
   firebase_auth: ^5.5.1
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.1
+  cloud_firestore: ^5.6.5
+  supabase_flutter: ^2.3.4
+  image_picker: ^1.0.7
+  provider: ^6.1.1
+  uuid: ^4.3.3
+  intl: ^0.19.0
+  timeago: ^3.6.1
+  photo_view: ^0.14.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -91,3 +100,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: Billabong
+      fonts:
+        - asset: assets/fonts/Billabong.ttf
