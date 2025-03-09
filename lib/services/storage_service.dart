@@ -10,7 +10,7 @@ class StorageService {
     String path = '$childName/$id';
 
     try {
-      await _supabase.storage.from('instagram').upload(
+      await _supabase.storage.from('instagram-images').upload(
             path,
             file,
             fileOptions: const FileOptions(
@@ -20,7 +20,7 @@ class StorageService {
           );
 
       final String downloadUrl = _supabase.storage
-          .from('instagram')
+          .from('instagram-images')
           .getPublicUrl(path);
 
       return downloadUrl;
