@@ -9,6 +9,7 @@ class Post {
   final String profImage;
   final DateTime datePublished;
   final List<String> likes;
+  final String? location;
 
   Post({
     required this.postId,
@@ -19,6 +20,7 @@ class Post {
     required this.profImage,
     required this.datePublished,
     required this.likes,
+    this.location,
   });
 
   Map<String, dynamic> toJson() => {
@@ -30,6 +32,7 @@ class Post {
         'profImage': profImage,
         'datePublished': datePublished,
         'likes': likes,
+        'location': location,
       };
 
   static Post fromSnap(DocumentSnapshot snap) {
@@ -43,6 +46,7 @@ class Post {
       profImage: snapshot['profImage'] ?? '',
       datePublished: (snapshot['datePublished'] as Timestamp).toDate(),
       likes: List<String>.from(snapshot['likes'] ?? []),
+      location: snapshot['location'],
     );
   }
 }

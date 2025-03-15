@@ -8,19 +8,25 @@ class FirestoreService {
 
   // User operations
   Future<void> createUser(User user) async {
+    print('\n👤 Creating/Updating user profile in database...');
     await _firestore.collection('users').doc(user.uid).set(user.toJson());
+    print('✅ User profile saved successfully!\n');
   }
 
   Future<User> getUser(String uid) async {
+    print('\n🔍 Fetching user profile...');
     DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
+    print('✅ User profile retrieved!\n');
     return User.fromSnap(doc);
   }
 
   Future<void> followUser(String uid, String followId) async {
+    print('\n👥 Processing follow/unfollow action...');
     DocumentSnapshot snap = await _firestore.collection('users').doc(uid).get();
     List following = (snap.data()! as dynamic)['following'];
 
     if (following.contains(followId)) {
+      print('🔄 Unfollowing user...');
       await _firestore.collection('users').doc(followId).update({
         'followers': FieldValue.arrayRemove([uid])
       });
@@ -28,7 +34,9 @@ class FirestoreService {
       await _firestore.collection('users').doc(uid).update({
         'following': FieldValue.arrayRemove([followId])
       });
+      print('✅ User unfollowed successfully!\n');
     } else {
+      print('🤝 Following user...');
       await _firestore.collection('users').doc(followId).update({
         'followers': FieldValue.arrayUnion([uid])
       });
@@ -36,6 +44,7 @@ class FirestoreService {
       await _firestore.collection('users').doc(uid).update({
         'following': FieldValue.arrayUnion([followId])
       });
+      print('✅ User followed successfully!\n');
     }
   }
 
@@ -47,6 +56,7 @@ class FirestoreService {
     String postUrl,
     String profImage,
   ) async {
+    print('\n📝 Creating new post...');
     String postId = const Uuid().v1();
     Post post = Post(
       postId: postId,
@@ -59,19 +69,26 @@ class FirestoreService {
       likes: [],
     );
 
+    print('💾 Saving post to database...');
     await _firestore.collection('posts').doc(postId).set(post.toJson());
+    print('✅ Post created successfully!\n');
     return postId;
   }
 
   Future<void> likePost(String postId, String uid, List likes) async {
+    print('\n❤️ Processing like/unlike action...');
     if (likes.contains(uid)) {
+      print('💔 Removing like...');
       await _firestore.collection('posts').doc(postId).update({
         'likes': FieldValue.arrayRemove([uid])
       });
+      print('✅ Post unliked!\n');
     } else {
+      print('💖 Adding like...');
       await _firestore.collection('posts').doc(postId).update({
         'likes': FieldValue.arrayUnion([uid])
       });
+      print('✅ Post liked!\n');
     }
   }
 
@@ -82,6 +99,7 @@ class FirestoreService {
     String username,
     String profilePic,
   ) async {
+    print('\n💭 Adding new comment...');
     String commentId = const Uuid().v1();
     await _firestore
         .collection('posts')
@@ -97,13 +115,17 @@ class FirestoreService {
       'profilePic': profilePic,
       'datePublished': DateTime.now(),
     });
+    print('✅ Comment added successfully!\n');
   }
 
   Future<void> deletePost(String postId) async {
+    print('\n🗑️ Deleting post...');
     await _firestore.collection('posts').doc(postId).delete();
+    print('✅ Post deleted successfully!\n');
   }
 
   Stream<QuerySnapshot> getPostsStream() {
+    print('\n📱 Loading posts feed...');
     return _firestore
         .collection('posts')
         .orderBy('datePublished', descending: true)
@@ -111,10 +133,24 @@ class FirestoreService {
   }
 
   Stream<QuerySnapshot> getUserPosts(String uid) {
+    print('\n👤 Loading user posts...');
     return _firestore
         .collection('posts')
         .where('uid', isEqualTo: uid)
         .orderBy('datePublished', descending: true)
         .snapshots();
+  }
+
+  Future<void> sendMessage(String messageContent, String senderId, String recipientId) async {
+    print('\n✉️ Sending message...');
+    String messageId = const Uuid().v1();
+    await _firestore.collection('messages').doc(messageId).set({
+      'messageId': messageId,
+      'content': messageContent,
+      'senderId': senderId,
+      'recipientId': recipientId,
+      'timestamp': DateTime.now(),
+    });
+    print('✅ Message sent successfully!\n');
   }
 }

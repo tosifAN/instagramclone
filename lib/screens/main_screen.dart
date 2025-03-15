@@ -5,6 +5,7 @@ import 'feed_screen.dart';
 import 'search_screen.dart';
 import 'add_post_screen.dart';
 import 'profile_screen.dart';
+import 'direct_messages_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -58,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
           const FeedScreen(),
           const SearchScreen(),
           const AddPostScreen(),
-          const Center(child: Text('Activity')), // TODO: Implement activity screen
+          const DirectMessagesScreen(),
           ProfileScreen(uid: user?.uid),
         ],
       ),
@@ -86,8 +87,8 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Post',
             ),
             const BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border),
-              label: 'Activity',
+              icon: Icon(Icons.chat_bubble_outline),
+              label: 'Messages',
             ),
             BottomNavigationBarItem(
               icon: CircleAvatar(
@@ -100,12 +101,12 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
           currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
           selectedItemColor: isDarkMode ? Colors.white : Colors.black,
-          unselectedItemColor: Colors.grey,
+          unselectedItemColor: isDarkMode ? Colors.grey : Colors.grey[700],
           showSelectedLabels: false,
           showUnselectedLabels: false,
+          type: BottomNavigationBarType.fixed,
+          onTap: _onItemTapped,
         ),
       ),
     );
