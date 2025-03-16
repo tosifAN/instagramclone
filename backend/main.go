@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"instagram-backend/config"
+	"instagram-backend/docs"
 	"instagram-backend/handlers"
 	"instagram-backend/middleware"
 	"instagram-backend/models"
-	"instagram-backend/config"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -148,8 +151,12 @@ func setupServer() *gin.Engine {
 	return r
 }
 
+// @BasePath /api/v1
 func setupRouter() *gin.Engine {
 	r := setupServer()
+
+	// Swagger documentation endpoint
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(db)
@@ -189,6 +196,12 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	// Initialize Swagger documentation
+	docs.SwaggerInfo.Title = "Instagram Backend API"
+	docs.SwaggerInfo.Description = "REST API for Instagram-like social media platform"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.BasePath = "/api/v1"
+
 	// Setup database
 	if err := setupDatabase(); err != nil {
 		log.Fatalf("Failed to setup database: %v", err)
@@ -209,13 +222,17 @@ func main() {
 		port = "8080"
 	}
 
+	readTimeout, _ := time.ParseDuration(os.Getenv("READ_TIMEOUT"))
+	writeTimeout, _ := time.ParseDuration(os.Getenv("WRITE_TIMEOUT"))
+	idleTimeout, _ := time.ParseDuration(os.Getenv("IDLE_TIMEOUT"))
+
 	// Create server with timeouts
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		IdleTimeout:  idleTimeout,
 	}
 
 	// Start server in a goroutine

@@ -42,6 +42,17 @@ type CreatePostRequest struct {
 	PurchaseOptions []PurchaseOptionRequest `json:"purchaseOptions,omitempty"`
 }
 
+// @Summary Create a new post
+// @Description Create a new post with images, video, or live stream
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param post body CreatePostRequest true "Post creation information"
+// @Success 201 {object} models.SwaggerPost
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	var req CreatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -110,6 +121,17 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	c.JSON(http.StatusCreated, post)
 }
 
+// @Summary Get all posts
+// @Description Get paginated list of posts
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number"
+// @Param pageSize query int false "Page size"
+// @Success 200 {array} models.SwaggerPost
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/posts [get]
 func (h *PostHandler) GetPosts(c *gin.Context) {
 	// Apply rate limiting
 	<-h.rateLimit.C

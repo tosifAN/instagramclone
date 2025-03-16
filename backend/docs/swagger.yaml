@@ -1,0 +1,489 @@
+basePath: /api/v1
+definitions:
+  handlers.CreatePostRequest:
+    properties:
+      caption:
+        type: string
+      contentType:
+        description: '"feed", "reel", or "live"'
+        type: string
+      imageUrls:
+        description: for feed posts
+        items:
+          type: string
+        type: array
+      liveStreamUrl:
+        description: for live posts
+        type: string
+      location:
+        type: string
+      purchaseOptions:
+        items:
+          $ref: '#/definitions/handlers.PurchaseOptionRequest'
+        type: array
+      videoUrl:
+        description: for reel posts
+        type: string
+    required:
+    - contentType
+    type: object
+  handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.PurchaseOptionRequest:
+    properties:
+      platform:
+        type: string
+      url:
+        type: string
+    required:
+    - platform
+    - url
+    type: object
+  handlers.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      role:
+        description: '"buyer" or "seller"'
+        enum:
+        - buyer
+        - seller
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - role
+    - username
+    type: object
+  models.SwaggerComment:
+    properties:
+      content:
+        example: Great post!
+        type: string
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      postId:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/models.SwaggerUser'
+      userId:
+        example: 1
+        type: integer
+    type: object
+  models.SwaggerLike:
+    properties:
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      postId:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/models.SwaggerUser'
+      userId:
+        example: 1
+        type: integer
+    type: object
+  models.SwaggerPost:
+    properties:
+      caption:
+        example: Beautiful sunset
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/models.SwaggerComment'
+        type: array
+      contentType:
+        example: feed
+        type: string
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      likes:
+        items:
+          $ref: '#/definitions/models.SwaggerLike'
+        type: array
+      liveStreamUrl:
+        example: https://example.com/live
+        type: string
+      location:
+        example: New York
+        type: string
+      postImages:
+        items:
+          $ref: '#/definitions/models.SwaggerPostImage'
+        type: array
+      purchaseOptions:
+        items:
+          $ref: '#/definitions/models.SwaggerPurchaseOption'
+        type: array
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/models.SwaggerUser'
+      userId:
+        example: 1
+        type: integer
+      videoUrl:
+        example: https://example.com/video.mp4
+        type: string
+    type: object
+  models.SwaggerPostImage:
+    properties:
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      imageUrl:
+        example: https://example.com/image.jpg
+        type: string
+      postId:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+    type: object
+  models.SwaggerPurchaseOption:
+    properties:
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      platform:
+        example: Amazon
+        type: string
+      postId:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      url:
+        example: https://amazon.com/product
+        type: string
+    type: object
+  models.SwaggerUser:
+    properties:
+      bio:
+        example: Software Developer
+        type: string
+      created_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      deleted_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      email:
+        example: john@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: John Doe
+        type: string
+      posts:
+        items:
+          $ref: '#/definitions/models.SwaggerPost'
+        type: array
+      profileImage:
+        example: https://example.com/profile.jpg
+        type: string
+      role:
+        example: seller
+        type: string
+      subscribers:
+        items:
+          $ref: '#/definitions/models.SwaggerUser'
+        type: array
+      updated_at:
+        example: "2024-03-15T10:00:00Z"
+        type: string
+      username:
+        example: john_doe
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - auth
+  /api/posts:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of posts
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SwaggerPost'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all posts
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Create a new post with images, video, or live stream
+      parameters:
+      - description: Post creation information
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SwaggerPost'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+      tags:
+      - posts
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided information
+      parameters:
+      - description: User registration information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SwaggerUser'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /api/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user profile by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerUser'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user profile information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update information
+        in: body
+        name: user
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SwaggerUser'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - users
+swagger: "2.0"

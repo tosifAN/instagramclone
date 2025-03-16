@@ -37,6 +37,17 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary Register a new user
+// @Description Register a new user with the provided information
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body RegisterRequest true "User registration information"
+// @Success 201 {object} models.SwaggerUser
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	// Apply rate limiting
 	<-h.rateLimit.C
@@ -129,6 +140,17 @@ func (h *AuthHandler) GetUserSubscribers(c *gin.Context) {
 	c.JSON(http.StatusOK, subscribers)
 }
 
+// @Summary User login
+// @Description Authenticate a user and return a JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param credentials body LoginRequest true "Login credentials"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -159,6 +181,16 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+// @Summary Get user profile
+// @Description Get user profile by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} models.SwaggerUser
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/users/{id} [get]
 func (h *AuthHandler) GetUser(c *gin.Context) {
 	var user models.User
 	if err := h.db.First(&user, c.Param("id")).Error; err != nil {
@@ -168,6 +200,19 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary Update user profile
+// @Description Update user profile information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body map[string]interface{} true "User update information"
+// @Success 200 {object} models.SwaggerUser
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/users/{id} [put]
 func (h *AuthHandler) UpdateUser(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	paramID := c.Param("id")
