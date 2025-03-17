@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"instagram-backend/cache"
 	"instagram-backend/models"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -177,6 +180,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Cache user data after successful login
+	if err := cache.CacheUser(c.Request.Context(), &user); err != nil {
+		// Log the error but don't fail the request
+		log.Printf("Failed to cache user data: %v", err)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"user":  user,
@@ -194,11 +203,29 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/users/{id} [get]
 func (h *AuthHandler) GetUser(c *gin.Context) {
+	userID, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+
+	// Try to get user from cache first
+	cachedUser, err := cache.GetCachedUser(c.Request.Context(), uint(userID))
+	if err == nil {
+		c.Header("X-Cache", "HIT")
+		c.Header("Cache-Control", "private, max-age=300")
+		c.JSON(http.StatusOK, cachedUser)
+		return
+	}
+
 	var user models.User
-	if err := h.db.First(&user, c.Param("id")).Error; err != nil {
+	if err := h.db.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+
+	// Cache the user for future requests
+	if err := cache.CacheUser(c.Request.Context(), &user); err != nil {
+		log.Printf("Failed to cache user: %v", err)
+	}
+
+	c.Header("Cache-Control", "private, max-age=300")
 	c.JSON(http.StatusOK, user)
 }
 
@@ -248,6 +275,11 @@ func (h *AuthHandler) UpdateUser(c *gin.Context) {
 	if err := h.db.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
+	}
+
+	// Invalidate the user cache after update
+	if err := cache.InvalidateUserCache(c.Request.Context(), user.ID); err != nil {
+		log.Printf("Failed to invalidate user cache: %v", err)
 	}
 
 	c.JSON(http.StatusOK, user)

@@ -7,6 +7,7 @@ import (
 	"instagram-backend/cache"
 	"instagram-backend/config"
 	"instagram-backend/models"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -246,7 +247,9 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 		}
 
 		// Cache the post for future requests
-		// Temporarily remove cache implementation until package is ready
+		if err := cache.CachePost(c.Request.Context(), &post); err != nil {
+			log.Printf("Failed to cache post: %v", err)
+		}
 
 		postChan <- &post
 	}()
@@ -270,6 +273,12 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetUint("user_id")
+
+	// Invalidate the post cache before deletion
+	postID, _ := strconv.ParseUint(id, 10, 32)
+	if err := cache.InvalidatePostCache(c.Request.Context(), uint(postID)); err != nil {
+		log.Printf("Failed to invalidate post cache: %v", err)
+	}
 
 	var post models.Post
 	if result := h.db.First(&post, id); result.Error != nil {
@@ -365,6 +374,12 @@ func (h *PostHandler) CreateComment(c *gin.Context) {
 func (h *PostHandler) UpdatePost(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	postID := c.Param("id")
+
+	// Invalidate the post cache before updating
+	id, _ := strconv.ParseUint(postID, 10, 32)
+	if err := cache.InvalidatePostCache(c.Request.Context(), uint(id)); err != nil {
+		log.Printf("Failed to invalidate post cache: %v", err)
+	}
 
 	// Find the post
 	var post models.Post
