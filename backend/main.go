@@ -162,34 +162,38 @@ func setupRouter() *gin.Engine {
 	authHandler := handlers.NewAuthHandler(db)
 	postHandler := handlers.NewPostHandler(db)
 
-	// Public routes
-	r.POST("/api/register", authHandler.Register)
-	r.POST("/api/login", authHandler.Login)
-
-	// Protected routes
-	protected := r.Group("/api")
-	protected.Use(middleware.AuthMiddleware())
+	// API v1 routes
+	v1 := r.Group("/api/v1")
 	{
-		// User routes
-		protected.GET("/users/:id", authHandler.GetUser)
-		protected.PUT("/users/:id", authHandler.UpdateUser)
-		protected.GET("/users/:id/subscribers", authHandler.GetUserSubscribers)
+		// Public routes
+		v1.POST("/register", authHandler.Register)
+		v1.POST("/login", authHandler.Login)
 
-		// Post routes
-		protected.POST("/posts", postHandler.CreatePost)
-		protected.GET("/posts", postHandler.GetPosts)
-		protected.GET("/posts/:id", postHandler.GetPost)
-		protected.PUT("/posts/:id", postHandler.UpdatePost)
-		protected.DELETE("/posts/:id", postHandler.DeletePost)
+		// Protected routes
+		protected := v1.Group("/")
+		protected.Use(middleware.AuthMiddleware())
+		{
+			// User routes
+			protected.GET("/users/:id", authHandler.GetUser)
+			protected.PUT("/users/:id", authHandler.UpdateUser)
+			protected.GET("/users/:id/subscribers", authHandler.GetUserSubscribers)
 
-		// Like routes
-		protected.POST("/posts/:id/like", postHandler.LikePost)
-		protected.DELETE("/posts/:id/like", postHandler.UnlikePost)
+			// Post routes
+			protected.POST("/posts", postHandler.CreatePost)
+			protected.GET("/posts", postHandler.GetPosts)
+			protected.GET("/posts/:id", postHandler.GetPost)
+			protected.PUT("/posts/:id", postHandler.UpdatePost)
+			protected.DELETE("/posts/:id", postHandler.DeletePost)
 
-		// Comment routes
-		protected.POST("/posts/:id/comments", postHandler.CreateComment)
-		protected.GET("/posts/:id/comments", postHandler.GetComments)
-		protected.DELETE("/posts/:id/comments/:commentId", postHandler.DeleteComment)
+			// Like routes
+			protected.POST("/posts/:id/like", postHandler.LikePost)
+			protected.DELETE("/posts/:id/like", postHandler.UnlikePost)
+
+			// Comment routes
+			protected.POST("/posts/:id/comments", postHandler.CreateComment)
+			protected.GET("/posts/:id/comments", postHandler.GetComments)
+			protected.DELETE("/posts/:id/comments/:commentId", postHandler.DeleteComment)
+		}
 	}
 
 	return r

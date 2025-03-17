@@ -122,13 +122,16 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 }
 
 // @Summary Get all posts
-// @Description Get paginated list of posts
+// @Description Get paginated list of posts with rate limiting and caching
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param page query int false "Page number"
 // @Param pageSize query int false "Page size"
 // @Success 200 {array} models.SwaggerPost
+// @Header 200 {string} X-Cache "HIT when response is from cache, MISS otherwise"
+// @Header 200 {string} Cache-Control "Caching directives"
+// @Failure 429 {object} map[string]string "Rate limit exceeded"
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
 // @Router /api/posts [get]

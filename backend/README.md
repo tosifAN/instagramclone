@@ -3,7 +3,7 @@
 
 - **Go**: Programming language
 - **Gin**: Web framework for routing
-- **GORM**: ORM library to deal wiht the database
+- **GORM**: ORM library to deal with the database
 - **PostgreSQL**: Database
 - **JWT**: Authentication
 - **bcrypt**: for hashing

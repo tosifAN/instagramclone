@@ -46,8 +46,9 @@ type LoginRequest struct {
 // @Success 201 {object} models.SwaggerUser
 // @Failure 400 {object} map[string]string
 // @Failure 409 {object} map[string]string
+// @Failure 429 {object} map[string]string "Rate limit exceeded"
 // @Failure 500 {object} map[string]string
-// @Router /api/register [post]
+// @Router /api/v1/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	// Apply rate limiting
 	<-h.rateLimit.C
@@ -149,8 +150,9 @@ func (h *AuthHandler) GetUserSubscribers(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 429 {object} map[string]string "Rate limit exceeded"
 // @Failure 500 {object} map[string]string
-// @Router /api/login [post]
+// @Router /api/v1/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
