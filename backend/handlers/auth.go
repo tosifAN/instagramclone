@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"instagram-backend/cache"
 	"instagram-backend/models"
 	"log"
@@ -16,14 +17,18 @@ import (
 )
 
 type AuthHandler struct {
-	db *gorm.DB
+	db        *gorm.DB
 	rateLimit *time.Ticker
 }
 
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
+	requestsPerSecond, _ := strconv.Atoi(os.Getenv("RATE_LIMIT_REQUESTS_PER_SECOND"))
+	if requestsPerSecond <= 0 {
+		requestsPerSecond = 10 // Default value
+	}
 	return &AuthHandler{
-		db: db,
-		rateLimit: time.NewTicker(time.Second / 10), // Limit to 10 requests per second
+		db:        db,
+		rateLimit: time.NewTicker(time.Second / time.Duration(requestsPerSecond)),
 	}
 }
 
@@ -296,12 +301,31 @@ func (h *AuthHandler) GetUserSubscriptions(c *gin.Context) {
 	c.JSON(http.StatusOK, subscriptions)
 }
 
-func generateToken(userID uint) (string, error) {
+func generateToken(userOrID interface{}) (string, error) {
+	expiryDays, _ := strconv.Atoi(os.Getenv("JWT_EXPIRY_DAYS"))
+	if expiryDays <= 0 {
+		expiryDays = 7 // Default value
+	}
+
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days expiry
+		"exp": time.Now().Add(time.Hour * 24 * time.Duration(expiryDays)).Unix(),
+	}
+
+	switch v := userOrID.(type) {
+	case uint:
+		claims["user_id"] = v
+	case *models.User:
+		claims["user_id"] = v.ID
+		claims["role"] = v.Role
+	default:
+		return "", fmt.Errorf("invalid argument type for generateToken")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	secretKey := os.Getenv("JWT_SECRET")
+	if secretKey == "" {
+		secretKey = "your-secret-key-here" // Default value
+	}
+
+	return token.SignedString([]byte(secretKey))
 }

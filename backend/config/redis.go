@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -22,18 +23,27 @@ func SetupRedis() error {
 		redisURL = "localhost:6379"
 	}
 
-	// Configure Redis client with optimized settings
+	// Get Redis configuration from environment variables
+	poolSize, _ := strconv.Atoi(os.Getenv("REDIS_POOL_SIZE"))
+	minIdleConns, _ := strconv.Atoi(os.Getenv("REDIS_MIN_IDLE_CONNS"))
+	maxRetries, _ := strconv.Atoi(os.Getenv("REDIS_MAX_RETRIES"))
+	dialTimeout, _ := strconv.Atoi(os.Getenv("REDIS_DIAL_TIMEOUT"))
+	readTimeout, _ := strconv.Atoi(os.Getenv("REDIS_READ_TIMEOUT"))
+	writeTimeout, _ := strconv.Atoi(os.Getenv("REDIS_WRITE_TIMEOUT"))
+	poolTimeout, _ := strconv.Atoi(os.Getenv("REDIS_POOL_TIMEOUT"))
+
+	// Configure Redis client with settings from environment variables
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:         redisURL,
 		Password:     "", // no password by default
 		DB:           0,  // use default DB
-		PoolSize:     100,
-		MinIdleConns: 10,
-		MaxRetries:   3,
-		DialTimeout:  5 * time.Second,
-		ReadTimeout:  3 * time.Second,
-		WriteTimeout: 3 * time.Second,
-		PoolTimeout:  4 * time.Second,
+		PoolSize:     poolSize,
+		MinIdleConns: minIdleConns,
+		MaxRetries:   maxRetries,
+		DialTimeout:  time.Duration(dialTimeout) * time.Second,
+		ReadTimeout:  time.Duration(readTimeout) * time.Second,
+		WriteTimeout: time.Duration(writeTimeout) * time.Second,
+		PoolTimeout:  time.Duration(poolTimeout) * time.Second,
 	})
 
 	// Test the connection

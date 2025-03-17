@@ -5,13 +5,21 @@ import (
 	"encoding/json"
 	"instagram-backend/config"
 	"instagram-backend/models"
+	"os"
+	"strconv"
 	"time"
 )
 
-const (
-	PostCachePrefix    = "post:"
-	UserCachePrefix    = "user:"
-	DefaultExpiration = 30 * time.Minute
+var (
+	PostCachePrefix    = os.Getenv("REDIS_POST_CACHE_PREFIX")
+	UserCachePrefix    = os.Getenv("REDIS_USER_CACHE_PREFIX")
+	DefaultExpiration = time.Duration(func() int {
+		exp, err := strconv.Atoi(os.Getenv("REDIS_CACHE_EXPIRATION"))
+		if err != nil || exp <= 0 {
+			return 30 // Default to 30 minutes if not set or invalid
+		}
+		return exp
+	}()) * time.Minute
 )
 
 // CachePost caches a post with its associations
